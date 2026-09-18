@@ -1,0 +1,58 @@
+# --- entornos y dependencias ---
+venv/
+.venv/
+node_modules/
+__pycache__/
+*.pyc
+
+# --- secretos y credenciales (NUNCA subir) ---
+.env
+.env.*
+secrets/
+server_token.txt
+server_cert.pem
+server_key.pem
+*.pem
+*.key
+*.p12
+*.pfx
+*credentials*.json
+*token*.json
+
+# --- datos personales / estado local ---
+jarvis_memory.db
+*.db
+*.sqlite
+*.sqlite3
+voice_config.json
+local_config.json
+logs/
+tmp_audio/
+whatsapp_profile/
+samples/
+
+# --- binarios y artefactos generados ---
+*.exe
+launcher/bin/
+launcher/obj/
+jarvis/ui/
+
+# --- audio y modelos (pesados / no redistribuibles) ---
+*.wav
+*.mp3
+*.pth
+*.pt
+*.onnx
+*.ckpt
+*.safetensors
+
+# --- benchmarks: codigo de terceros, checkpoints y salidas generadas ---
+benchmarks/openvoice/OpenVoice/
+benchmarks/openvoice/processed/
+benchmarks/**/output/
+
+# --- editor / SO ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

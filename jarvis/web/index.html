@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Jarvis</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div id="app" data-state="inactivo">
+    <div class="bg-glow" aria-hidden="true"></div>
+    <div class="bg-grid" aria-hidden="true"></div>
+
+    <h1 class="brand">JARVIS<span class="brand-underline" aria-hidden="true"></span></h1>
+
+    <div id="tokenGate" class="token-gate panel">
+      <p>Ingresá el PIN de 4 dígitos que te muestra Jarvis<br>(decile "mandame el QR" y te lo dice/muestra).</p>
+      <input id="tokenInput" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="••••" autocomplete="off" autocapitalize="off">
+      <button id="tokenSave" class="primary-btn" type="button">
+        <span>Conectar</span>
+      </button>
+      <p id="tokenError" class="error"></p>
+    </div>
+
+    <div id="mainUi" class="main-ui hidden">
+      <div class="jarvis-stage">
+        <svg class="jarvis-ring" viewBox="0 0 200 200" aria-hidden="true">
+          <circle class="jr-outer" cx="100" cy="100" r="92"/>
+          <circle class="jr-ticks" cx="100" cy="100" r="84"/>
+          <circle class="jr-arc jr-arc-1" cx="100" cy="100" r="72"/>
+          <circle class="jr-arc jr-arc-2" cx="100" cy="100" r="58"/>
+        </svg>
+        <!-- el boton mismo hace de "core" del anillo (mismo look que
+             .ring-core en jarvis/ui/style.css, la version de PC): sin un
+             circulo de relleno separado atras, que quedaba duplicado -->
+        <button id="micBtn" class="mic-btn" type="button" aria-label="Mantené presionado para hablar">
+          <span class="ring ring-1"></span>
+          <span class="ring ring-2"></span>
+        </button>
+      </div>
+      <div class="mic-hint">Mantené presionado para hablar</div>
+      <div class="state-label"><span class="state-dot"></span><span id="stateLabel">EN ESPERA</span></div>
+
+      <div class="captions panel">
+        <div class="caption heard" id="heardText"></div>
+        <div class="caption response" id="responseText"></div>
+      </div>
+
+      <form id="textForm" class="text-form">
+        <input id="textInput" type="text" placeholder="O escribí un comando..." autocomplete="off">
+        <button id="micBtnSmall" class="mic-btn-small" type="button" aria-label="Mantené presionado para hablar">
+          <span class="ring-s ring-s-1"></span>
+          <span class="ring-s ring-s-2"></span>
+          <svg class="mic-icon-small" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" fill="currentColor"/>
+            <path d="M19 10v1a7 7 0 0 1-14 0v-1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M12 19v3M8 22h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <button type="submit" class="send-btn" aria-label="Enviar">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M22 2 11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M22 2 15 22l-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>Enviar</span>
+        </button>
+      </form>
+
+      <div class="bottom-actions">
+        <button id="lobotomizeBtn" class="lobotomize-btn" type="button">
+          🧠 Lobotomizar
+        </button>
+        <button id="voiceSettingsBtn" class="voice-settings-btn" type="button">
+          ⚙️ Voz
+        </button>
+      </div>
+
+      <div id="voicePanel" class="voice-panel panel hidden">
+        <div class="voice-panel-title">Motor de voz</div>
+        <button id="voiceOptionOpenvoice" class="voice-option" data-engine="openvoice" type="button">
+          <span>OpenVoice</span><span class="voice-option-tag">rápida</span>
+        </button>
+        <button id="voiceOptionXtts" class="voice-option" data-engine="xtts" type="button">
+          <span>XTTS</span><span class="voice-option-tag">clásica</span>
+        </button>
+        <div id="voiceProgress" class="voice-progress hidden">
+          <div class="voice-progress-track"><div class="voice-progress-bar"></div></div>
+          <span id="voiceProgressLabel">Cargando modelo...</span>
+        </div>
+        <p id="voiceError" class="error"></p>
+        <button id="voicePanelClose" class="voice-panel-close" type="button">Cerrar</button>
+      </div>
+    </div>
+  </div>
+  <script src="/static/app.js"></script>
+</body>
+</html>

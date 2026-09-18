@@ -1,0 +1,711 @@
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+  background: #05080a;
+  color: #eafcff;
+  font-family: Consolas, "Segoe UI", monospace;
+  -webkit-tap-highlight-color: transparent;
+  overflow-x: hidden;
+}
+
+#app {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: calc(32px + env(safe-area-inset-top)) 20px calc(40px + env(safe-area-inset-bottom));
+  background: #05080a;
+  overflow: hidden;
+}
+
+/* --- fondo ambiental: brillo que respira despacio + grilla sutil, todo
+   detras del contenido (z-index negativo) y con pointer-events:none para
+   que nunca interfiera con los toques --- */
+.bg-glow {
+  position: fixed;
+  inset: -20%;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 40% at 50% 18%, rgba(33, 230, 255, 0.16) 0%, rgba(5, 8, 10, 0) 60%),
+    radial-gradient(ellipse 50% 35% at 85% 75%, rgba(185, 104, 255, 0.08) 0%, rgba(5, 8, 10, 0) 65%);
+  animation: ambient-drift 14s ease-in-out infinite;
+}
+
+.bg-grid {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image:
+    linear-gradient(rgba(33, 230, 255, 0.6) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(33, 230, 255, 0.6) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, #000 0%, transparent 75%);
+}
+
+@keyframes ambient-drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(-2%, 2%) scale(1.05); }
+}
+
+.brand {
+  position: relative;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 8px;
+  color: #21e6ff;
+  text-shadow: 0 0 10px rgba(33, 230, 255, 0.65), 0 0 24px rgba(33, 230, 255, 0.25);
+  margin: 8px 0 30px;
+  animation: brand-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) both, brand-flicker 6s ease-in-out 1s infinite;
+}
+
+.brand-underline {
+  display: block;
+  width: 46px;
+  height: 2px;
+  margin: 10px auto 0;
+  background: linear-gradient(90deg, transparent, #21e6ff, transparent);
+  box-shadow: 0 0 8px #21e6ff;
+  animation: underline-grow 0.8s 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes brand-in {
+  from { opacity: 0; transform: translateY(-8px); letter-spacing: 2px; }
+  to   { opacity: 1; transform: translateY(0); letter-spacing: 8px; }
+}
+
+@keyframes brand-flicker {
+  0%, 92%, 100% { opacity: 1; }
+  94% { opacity: 0.75; }
+  96% { opacity: 1; }
+}
+
+@keyframes underline-grow {
+  from { width: 0; opacity: 0; }
+  to   { width: 46px; opacity: 1; }
+}
+
+.panel {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.01));
+  border: 1px solid rgba(33, 230, 255, 0.15);
+  border-radius: 14px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2) inset, 0 12px 30px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(6px);
+}
+
+.token-gate,
+.main-ui {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  text-align: center;
+}
+
+.token-gate {
+  padding: 24px 22px 20px;
+  animation: panel-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.hidden {
+  display: none !important;
+}
+
+@keyframes panel-in {
+  from { opacity: 0; transform: translateY(14px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.token-gate p {
+  font-size: 13px;
+  opacity: 0.8;
+  line-height: 1.5;
+  margin-top: 0;
+}
+
+#tokenInput,
+#textInput {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: #eafcff;
+  font-family: inherit;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+}
+
+#tokenInput:focus,
+#textInput:focus {
+  border-color: #21e6ff;
+  box-shadow: 0 0 0 3px rgba(33, 230, 255, 0.15), 0 0 14px rgba(33, 230, 255, 0.25);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+#tokenInput {
+  text-align: center;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: 14px;
+  padding-left: 26px; /* compensa el letter-spacing para que quede centrado */
+}
+
+#tokenInput::placeholder {
+  color: rgba(234, 252, 255, 0.25);
+}
+
+/* --- botones "primarios" (Conectar) con relleno degradado y brillo que
+   recorre el boton al pasar el mouse/tocar, mas feedback de presion --- */
+.primary-btn,
+.send-btn {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #21e6ff;
+  background: linear-gradient(180deg, rgba(33, 230, 255, 0.16), rgba(33, 230, 255, 0.05));
+  color: #21e6ff;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease, background 0.25s ease;
+}
+
+.primary-btn {
+  width: 100%;
+  padding: 13px;
+}
+
+.primary-btn::after,
+.send-btn::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -60%;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(115deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  transform: skewX(-20deg);
+  transition: left 0.6s ease;
+}
+
+.primary-btn:hover::after,
+.send-btn:hover::after {
+  left: 130%;
+}
+
+.primary-btn:hover,
+.send-btn:hover {
+  box-shadow: 0 0 16px rgba(33, 230, 255, 0.35);
+}
+
+.primary-btn:active,
+.send-btn:active {
+  transform: scale(0.96);
+}
+
+.error {
+  color: #ff5f5f;
+  font-size: 13px;
+  min-height: 18px;
+  margin: 8px 0 0;
+  transition: opacity 0.2s ease;
+}
+
+/* ================= avatar de Jarvis (reacciona a cada estado) ================= */
+/* Este anillo es "Jarvis" (arranca/escucha/piensa/responde, igual que el
+   HUD de PC): gira y cambia de color y velocidad segun el estado. Es
+   deliberadamente un elemento aparte del boton de microfono de abajo (que
+   solo reacciona cuando esta efectivamente grabando) para que no sea "la
+   misma cosa" reaccionando dos veces a lo mismo. */
+
+#app {
+  --spin-speed: 9s;
+  --pulse-speed: 3s;
+}
+
+#app[data-state="cargando"]   { --accent: #8a95a0; --spin-speed: 11s;  --pulse-speed: 3.6s; }
+#app[data-state="inactivo"]   { --accent: #6b7680; --spin-speed: 14s;  --pulse-speed: 3.2s; }
+#app[data-state="escuchando"] { --accent: #21e6ff; --spin-speed: 2.4s; --pulse-speed: 1s;   }
+#app[data-state="pensando"]   { --accent: #b968ff; --spin-speed: 1.3s; --pulse-speed: 0.85s;}
+#app[data-state="hablando"]   { --accent: #39ffb0; --spin-speed: 1s;   --pulse-speed: 0.55s;}
+
+.jarvis-stage {
+  position: relative;
+  width: 210px;
+  height: 210px;
+  margin: 4px auto 0;
+}
+
+.jarvis-ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.jr-outer {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.12);
+  stroke-width: 1;
+}
+
+/* sin esto el navegador rota cada circulo alrededor de un punto de
+   referencia distinto (esquina del svg) en vez de su propio centro */
+.jr-ticks, .jr-arc {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.jr-ticks {
+  fill: none;
+  stroke: var(--accent);
+  stroke-opacity: 0.35;
+  stroke-width: 1.5;
+  stroke-dasharray: 2 10;
+  transition: stroke 0.4s ease;
+  animation: jr-spin var(--spin-speed) linear infinite reverse;
+}
+
+.jr-arc {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 90 300;
+  filter: drop-shadow(0 0 6px var(--accent));
+  transition: stroke 0.4s ease;
+  animation: jr-spin var(--spin-speed) linear infinite;
+}
+
+.jr-arc-2 {
+  stroke-width: 2;
+  stroke-dasharray: 50 250;
+  opacity: 0.7;
+  animation: jr-spin calc(var(--spin-speed) * 1.6) linear infinite reverse;
+}
+
+@keyframes jr-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ================= boton de microfono = nucleo del anillo ================= */
+/* Mismo look que .jr-core / .ring-core de la version de PC: relleno casi
+   transparente, borde fino, glow con drop-shadow, respiracion continua. Sin
+   --accent propio (a diferencia de .mic-btn-small) hereda el color/velocidad
+   de #app[data-state=...] igual que el resto del anillo, para que cambie
+   con TODOS los estados exactamente igual que en PC, no solo al escuchar. */
+.mic-btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  border: 1.5px solid var(--accent);
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 0 10px var(--accent);
+  padding: 0;
+  cursor: pointer;
+  color: var(--accent);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  animation: mic-core-pulse var(--pulse-speed) ease-in-out infinite;
+  /* se mantiene presionado para hablar: sin esto, el long-press dispara el
+     menu contextual / seleccion de texto / scroll del navegador en vez de
+     solo activar el microfono */
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.mic-btn:active {
+  transform: translate(-50%, -50%) scale(0.93);
+}
+
+@keyframes mic-core-pulse {
+  0%, 100% { opacity: 0.75; transform: translate(-50%, -50%) scale(1); }
+  50%      { opacity: 1;    transform: translate(-50%, -50%) scale(1.04); }
+}
+
+.ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  opacity: 0;
+  pointer-events: none;
+}
+
+@keyframes ring-ping {
+  0%   { transform: scale(1);   opacity: 0.55; }
+  100% { transform: scale(1.9); opacity: 0; }
+}
+
+.mic-hint {
+  font-size: 11px;
+  letter-spacing: 1px;
+  opacity: 0.5;
+  margin: 14px 0 16px;
+  transition: opacity 0.3s ease;
+}
+
+/* .mic-btn no necesita override aca: al no tener --accent propio (ver
+   arriba), ya hereda color y --pulse-speed de #app[data-state=...] para
+   los 5 estados, igual que el resto del anillo. */
+
+#app[data-state="escuchando"] .mic-btn-small {
+  --accent: #21e6ff;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+#app[data-state="escuchando"] .ring-1 { animation: ring-ping 1.8s ease-out infinite; }
+#app[data-state="escuchando"] .ring-2 { animation: ring-ping 1.8s ease-out infinite 0.6s; }
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.08); }
+}
+
+/* --- indicador de estado: puntito que titila + etiqueta --- */
+.state-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 12px;
+  letter-spacing: 3px;
+  color: var(--accent, #6b7680);
+  margin-bottom: 20px;
+  transition: color 0.3s ease;
+}
+
+.state-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 6px currentColor;
+  animation: dot-blink 1.6s ease-in-out infinite;
+}
+
+@keyframes dot-blink {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.3; }
+}
+
+.captions {
+  width: 100%;
+  min-height: 74px;
+  margin-bottom: 22px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.caption {
+  font-size: 14px;
+  line-height: 1.4;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.caption.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.caption.heard {
+  color: #7fd8ee;
+  font-style: italic;
+  margin-bottom: 6px;
+  text-shadow: 0 0 4px rgba(33, 230, 255, 0.5);
+}
+
+.caption.response {
+  color: #eafcff;
+  font-weight: 600;
+  text-shadow: 0 0 5px rgba(33, 230, 255, 0.6);
+}
+
+/* cursor titilante al final de lo que se va escuchando, mientras Jarvis
+   sigue escuchando (efecto "se esta tipeando en vivo") */
+#app[data-state="escuchando"] .caption.heard.show::after {
+  content: "";
+  display: inline-block;
+  width: 2px;
+  height: 12px;
+  margin-left: 3px;
+  background: currentColor;
+  vertical-align: -2px;
+  animation: caret-blink 0.9s steps(1) infinite;
+}
+
+@keyframes caret-blink {
+  0%, 49%  { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+.text-form {
+  display: flex;
+  gap: 8px;
+}
+
+.text-form input {
+  flex: 1;
+  margin: 0;
+}
+
+.send-btn {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 16px;
+}
+
+.send-btn svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* ================= microfono chico (al lado de Enviar) ================= */
+
+.mic-btn-small {
+  --accent: #12b8d6;
+  position: relative;
+  flex: none;
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02) 60%);
+  box-shadow: 0 0 10px var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--accent);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease, transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.mic-btn-small:active {
+  transform: scale(0.9);
+}
+
+.mic-icon-small {
+  width: 18px;
+  height: 18px;
+  filter: drop-shadow(0 0 4px var(--accent));
+  pointer-events: none;
+}
+
+.ring-s {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  opacity: 0;
+  pointer-events: none;
+}
+
+#app[data-state="escuchando"] .ring-s-1 { animation: ring-ping 1.6s ease-out infinite; }
+#app[data-state="escuchando"] .ring-s-2 { animation: ring-ping 1.6s ease-out infinite 0.8s; }
+
+@media (max-width: 360px) {
+  .send-btn span { display: none; }
+  .send-btn { padding: 0 14px; }
+}
+
+/* ================= lobotomizar (reinicia la memoria de la IA) ================= */
+
+.lobotomize-btn {
+  margin-top: 18px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(185, 104, 255, 0.35);
+  background: rgba(185, 104, 255, 0.06);
+  color: #cba3ff;
+  font-family: inherit;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  opacity: 0.75;
+  cursor: pointer;
+  transition: opacity 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, transform 0.15s ease;
+}
+
+.lobotomize-btn:hover {
+  opacity: 1;
+  border-color: #b968ff;
+  box-shadow: 0 0 12px rgba(185, 104, 255, 0.4);
+}
+
+.lobotomize-btn:active {
+  transform: scale(0.95);
+}
+
+/* ================= configuracion de voz (elegir XTTS u OpenVoice) ================= */
+
+.bottom-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.lobotomize-btn,
+.voice-settings-btn {
+  margin-top: 0;
+}
+
+.voice-settings-btn {
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(33, 230, 255, 0.35);
+  background: rgba(33, 230, 255, 0.06);
+  color: #7fe3f5;
+  font-family: inherit;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  opacity: 0.75;
+  cursor: pointer;
+  transition: opacity 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, transform 0.15s ease;
+}
+
+.voice-settings-btn:hover {
+  opacity: 1;
+  border-color: #21e6ff;
+  box-shadow: 0 0 12px rgba(33, 230, 255, 0.4);
+}
+
+.voice-settings-btn:active {
+  transform: scale(0.95);
+}
+
+.voice-panel {
+  width: 100%;
+  max-width: 380px;
+  margin-top: 14px;
+  padding: 18px;
+  text-align: left;
+  animation: panel-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.voice-panel-title {
+  font-size: 11px;
+  letter-spacing: 2px;
+  opacity: 0.6;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.voice-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.03);
+  color: #eafcff;
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.voice-option:hover {
+  border-color: rgba(33, 230, 255, 0.4);
+}
+
+.voice-option.active {
+  border-color: #21e6ff;
+  background: rgba(33, 230, 255, 0.08);
+  box-shadow: 0 0 12px rgba(33, 230, 255, 0.25);
+}
+
+.voice-option.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.voice-option-tag {
+  font-size: 11px;
+  opacity: 0.55;
+  letter-spacing: 0.5px;
+}
+
+.voice-progress {
+  margin: 6px 0 4px;
+  text-align: center;
+}
+
+.voice-progress-track {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+/* barra indeterminada: no hay progreso real que medir (torch.load no
+   reporta porcentaje), asi que un bloque animado que va y viene es mas
+   honesto que fingir un numero */
+.voice-progress-bar {
+  width: 40%;
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, transparent, #21e6ff, transparent);
+  box-shadow: 0 0 8px #21e6ff;
+  animation: voice-progress-slide 1.2s ease-in-out infinite;
+}
+
+@keyframes voice-progress-slide {
+  0%   { transform: translateX(-120%); }
+  100% { transform: translateX(280%); }
+}
+
+#voiceProgressLabel {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.voice-panel-close {
+  width: 100%;
+  margin-top: 4px;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: transparent;
+  color: #eafcff;
+  font-family: inherit;
+  font-size: 13px;
+  opacity: 0.7;
+  cursor: pointer;
+}
+
+.voice-panel-close:hover {
+  opacity: 1;
+}

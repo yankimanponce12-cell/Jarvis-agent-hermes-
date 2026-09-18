@@ -1,0 +1,14 @@
+faster-whisper
+sounddevice
+numpy
+soundfile
+coqui-tts[cuda]
+nvidia-cublas-cu12
+selenium
+webdriver-manager
+pywebview
+flask
+qrcode[pil]
+cryptography
+requests
+zeroconf
