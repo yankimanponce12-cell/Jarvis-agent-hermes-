@@ -1,7 +1,7 @@
 """Servidor HTTP local para el motor de voz OpenVoice V2, pensado para
 correr como proceso APARTE bajo su propio venv
-(benchmarks/openvoice/OpenVoice/venv), porque sus dependencias (numpy
-viejo, transformers viejo, etc, ver notas de instalacion en bench.py)
+(openvoice_server/OpenVoice/venv), porque sus dependencias (numpy
+viejo, transformers viejo, etc, ver la seccion de OpenVoice en el README)
 chocan con las que ya usa XTTS en el venv principal del proyecto - no se
 pueden mezclar en un mismo proceso.
 
@@ -12,7 +12,7 @@ quede cargada de entrada, para no gastar VRAM/tiempo si nunca se usa) y le
 habla por HTTP en localhost mientras dura la sesion.
 
 Correr a mano (para probar):
-    benchmarks/openvoice/OpenVoice/venv/Scripts/python.exe serve.py
+    openvoice_server/OpenVoice/venv/Scripts/python.exe serve.py
 """
 
 import logging
@@ -28,9 +28,9 @@ logger = logging.getLogger("openvoice-serve")
 
 HERE = Path(__file__).resolve().parent
 CHECKPOINT_DIR = HERE / "OpenVoice" / "checkpoints_v2"
-REFERENCE_WAV = HERE.parent.parent / "samples" / "jarvis_reference.wav"
+REFERENCE_WAV = HERE.parent / "samples" / "jarvis_reference.wav"
 LANGUAGE = "ES"
-TAU = 0.1  # elegido a oido comparando contra jarvis_reference.wav (ver bench.py)
+TAU = 0.1  # elegido a oido comparando contra jarvis_reference.wav
 PORT = 8766
 
 app = Flask(__name__)

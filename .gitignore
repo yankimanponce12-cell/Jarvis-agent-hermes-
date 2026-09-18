@@ -46,10 +46,9 @@ jarvis/ui/
 *.ckpt
 *.safetensors
 
-# --- benchmarks: codigo de terceros, checkpoints y salidas generadas ---
-benchmarks/openvoice/OpenVoice/
-benchmarks/openvoice/processed/
-benchmarks/**/output/
+# --- OpenVoice: clon de terceros con su venv y checkpoints (se instala aparte) ---
+openvoice_server/OpenVoice/
+openvoice_server/processed/
 
 # --- editor / SO ---
 .vscode/

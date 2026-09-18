@@ -11,7 +11,7 @@ import soundfile as sf
 logger = logging.getLogger("jarvis.voice")
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-OPENVOICE_DIR = PROJECT_ROOT / "benchmarks" / "openvoice"
+OPENVOICE_DIR = PROJECT_ROOT / "openvoice_server"
 OPENVOICE_PYTHON = OPENVOICE_DIR / "OpenVoice" / "venv" / "Scripts" / "python.exe"
 OPENVOICE_SERVE_SCRIPT = OPENVOICE_DIR / "serve.py"
 OPENVOICE_PORT = 8766
@@ -20,11 +20,10 @@ OPENVOICE_URL = f"http://127.0.0.1:{OPENVOICE_PORT}"
 
 class OpenVoiceClient:
     """Le habla por HTTP al servidor de OpenVoice V2 (ver
-    benchmarks/openvoice/serve.py), que corre en su PROPIO venv/proceso
+    openvoice_server/serve.py), que corre en su PROPIO venv/proceso
     porque sus dependencias (numpy viejo, transformers viejo, etc) chocan
     con las que ya usa XTTS en este venv principal - no se pueden mezclar
-    en un mismo proceso (ver notas de instalacion en
-    benchmarks/openvoice/bench.py).
+    en un mismo proceso (ver la seccion de OpenVoice en el README).
 
     A proposito NO arranca el servidor en __init__: el usuario pidio que
     esta voz no quede cargada de entrada (para no gastar VRAM/tiempo si no

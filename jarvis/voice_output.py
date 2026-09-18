@@ -29,7 +29,7 @@ class VoiceEngine:
     """Motor de voz con DOS opciones intercambiables: XTTS v2 (local,
     clonado end-to-end, mas fiel pero pesado: ~2GB VRAM, ~3s por oracion) y
     OpenVoice V2 (subprocess aparte, ~4x mas rapido pero se parece un poco
-    menos a la voz de referencia - ver benchmarks/).
+    menos a la voz de referencia).
 
     A proposito, NINGUNO de los dos se carga hasta que hace falta: solo el
     motor ACTIVO (segun voice_config) se carga en segundo plano al llamar

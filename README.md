@@ -63,9 +63,41 @@ Configuración local opcional (ubicación de respaldo para el clima):
 copy local_config.example.json local_config.json   # y edita tus valores
 ```
 
-Motor de voz OpenVoice (opcional, más rápido que XTTS): sigue el setup descrito
-en `benchmarks/openvoice/bench.py` (clona OpenVoice en
-`benchmarks/openvoice/OpenVoice` con su propio venv). XTTS funciona sin eso.
+### Motor de voz OpenVoice (opcional)
+
+Es ~4x más rápido que XTTS pero se parece un poco menos a la voz de referencia.
+Corre como proceso aparte (`openvoice_server/serve.py`) con su propio venv,
+porque sus dependencias chocan con las de XTTS. XTTS funciona sin esto.
+
+```powershell
+cd openvoice_server
+git clone https://github.com/myshell-ai/OpenVoice.git
+cd OpenVoice
+
+# usa Python 3.10 para este venv (los pines viejos no tienen wheels en versiones nuevas)
+C:\ruta\a\Python310\python.exe -m venv venv
+
+# antes de instalar, en setup.py cambia 'faster-whisper==0.9.0' por 'faster-whisper>=1.0'
+venv\Scripts\pip install -e .
+venv\Scripts\pip install "setuptools<81"          # librosa==0.9.1 necesita pkg_resources
+
+# pip trae torch solo-CPU; fuerza la build con CUDA (ajusta cu130 a tu versión)
+venv\Scripts\pip install -U torch torchaudio --index-url https://download.pytorch.org/whl/cu130
+
+venv\Scripts\pip install git+https://github.com/myshell-ai/MeloTTS.git
+venv\Scripts\python -m unidic download
+
+# el .zip de la doc oficial da 404: usa el mirror de Hugging Face
+venv\Scripts\pip install "huggingface_hub[cli]"
+venv\Scripts\hf download myshell-ai/OpenVoiceV2 --local-dir checkpoints_v2
+
+# autoriza UNA vez el VAD de silero (pide confirmación interactiva la primera vez)
+venv\Scripts\python -c "import torch; torch.hub.load('snakers4/silero-vad', 'silero_vad', trust_repo=True, onnx=False)"
+```
+
+Jarvis arranca `serve.py` solo, bajo demanda, cuando eliges esta voz. Para
+probarlo a mano: `openvoice_server\OpenVoice\venv\Scripts\python.exe openvoice_server\serve.py`
+(escucha en `127.0.0.1:8766`).
 
 ## Uso
 
